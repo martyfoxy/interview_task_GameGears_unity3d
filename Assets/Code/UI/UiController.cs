@@ -5,7 +5,6 @@ using Code.Data;
 using Code.Settings;
 using UnityEngine;
 using Zenject;
-using Object = UnityEngine.Object;
 
 namespace Code.UI
 {
@@ -13,17 +12,19 @@ namespace Code.UI
     {
         private readonly UiContainer _uiContainer;
         private readonly PlayerRepository _playerRepository;
-        private readonly PrefabsSettings _prefabsSettings;
         private readonly SettingsRepository _settingsRepository;
         private readonly ActionPerformer _actionPerformer;
         private readonly List<PlayerViewData> _playersViewData;
+        private readonly Pool<StatView> _pool;
 
         private readonly Dictionary<TeamStatRelation, StatView> _statViews = new Dictionary<TeamStatRelation, StatView>();
+        private readonly Dictionary<TeamStatRelation, StatView> _buffsViews = new Dictionary<TeamStatRelation, StatView>();
         private readonly Dictionary<int, Sprite> _statsSpriteCache = new Dictionary<int, Sprite>();
         private readonly Dictionary<int, Sprite> _buffsSpriteCache = new Dictionary<int, Sprite>();
 
         private Action _startGameClick;
         private Action _startGameWithBuffsClick;
+        
 
         public UiController(
             UiContainer uiContainer, 
@@ -35,11 +36,10 @@ namespace Code.UI
         {
             _uiContainer = uiContainer;
             _playerRepository = playerRepository;
-            _prefabsSettings = prefabsSettings;
             _settingsRepository = settingsRepository;
             _actionPerformer = actionPerformer;
             _playersViewData = playersViewData;
-            
+            _pool = new Pool<StatView>(prefabsSettings.StatPrefab, 8);
         }
 
         public void Initialize()
@@ -56,23 +56,18 @@ namespace Code.UI
 
         public void ReInit()
         {
-            _statViews.Clear();
-            
+            ClearPanel();
+
             for (var i = 0; i < _settingsRepository.Settings.settings.playersCount; i++)
             {
                 var bindingData = _playersViewData[i];
-                
-                //Очистка панели
-                for (var j = 0; j < bindingData.panelView.statsPanel.childCount; j++)
-                    Object.Destroy(bindingData.panelView.statsPanel.GetChild(j).gameObject);
+                var player = _playerRepository.Get(i);
                 
                 //Добавляем иконки статов
                 foreach (var stat in _settingsRepository.Settings.stats)
                     AddStatToPanel(i, stat, bindingData.panelView.statsPanel);
                 
-                var player = _playerRepository.Get(i);
-
-                //Отображение статов
+                //Выставление значений
                 if (_statViews.TryGetValue(new TeamStatRelation(i, player.Armor.ID), out var armorView))
                     armorView.SetLabel(player.Armor.Value.ToString(CultureInfo.InvariantCulture));
                 
@@ -94,7 +89,7 @@ namespace Code.UI
 
                 //Добавляем иконки баффов
                 foreach (var playerBuff in player.Buffs)
-                    AddBuffToPanel(bindingData.panelView.statsPanel, playerBuff);
+                    AddBuffToPanel(i, playerBuff, bindingData.panelView.statsPanel);
             }
         }
 
@@ -116,11 +111,23 @@ namespace Code.UI
                 _statsSpriteCache.Add(stat.id, sprite);
             }
             
-            var statView = InstantiateIconOnPanel(panel, sprite);
+            var statView = SpawnStatView(panel, sprite);
             _statViews.Add(new TeamStatRelation(teamId, stat.id), statView);
         }
 
-        private void AddBuffToPanel(Transform panel, Buff buff)
+        private void ClearPanel()
+        {
+            foreach (var view in _buffsViews.Values)
+                _pool.Despawn(view);
+                
+            foreach (var view in _statViews.Values)
+                _pool.Despawn(view);
+            
+            _statViews.Clear();
+            _buffsViews.Clear();
+        }
+
+        private void AddBuffToPanel(int teamId, Buff buff, Transform panel)
         {
             if (!_buffsSpriteCache.TryGetValue(buff.id, out var sprite))
             {
@@ -128,12 +135,13 @@ namespace Code.UI
                 _buffsSpriteCache.Add(buff.id, sprite);
             }
 
-            InstantiateIconOnPanel(panel, sprite, buff.title);
+            var buffView = SpawnStatView(panel, sprite, buff.title);
+            _buffsViews.Add(new TeamStatRelation(teamId, buff.id), buffView);
         }
         
-        private StatView InstantiateIconOnPanel(Transform panel, Sprite icon, string text = default)
+        private StatView SpawnStatView(Transform panel, Sprite icon, string text = default)
         {
-            var statView = Object.Instantiate(_prefabsSettings.StatPrefab, panel);
+            var statView = _pool.Spawn(panel);
             statView.SetIcon(icon);
             statView.SetLabel(text);
 

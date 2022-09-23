@@ -8,11 +8,29 @@ namespace Code
 	    private int _nextId = 0;
 	    private readonly Stack<T> _inactiveStack;
 	    private readonly T _prefab;
+	    
+	    private Transform _poolRoot;
 		
-		public Pool(T prefab, int initialQty) 
+		public Pool(T prefab, int warmCount) 
 		{
-			_inactiveStack = new Stack<T>(initialQty);
+			_inactiveStack = new Stack<T>(warmCount);
 			_prefab = prefab;
+			
+			Warm(warmCount);
+		}
+
+		private void Warm(int warmCount)
+		{
+			_poolRoot = new GameObject($"Pool_{typeof(T)}").transform;
+			
+			for (var i = 0; i < warmCount; i++)
+			{
+				var instance = Object.Instantiate(_prefab, _poolRoot.transform, false);
+				instance.name = _prefab.name + "_" + _nextId++;
+				instance.transform.localPosition = Vector3.zero;
+				instance.gameObject.SetActive(false);
+				_inactiveStack.Push(instance);
+			}
 		}
 
 		public T Spawn(Transform pivot)
@@ -37,8 +55,9 @@ namespace Code
 			return instance;
 		}
 
-		public void Despawn(T obj) 
+		public void Despawn(T obj)
 		{
+			obj.transform.SetParent(_poolRoot.transform, false);
 			obj.gameObject.SetActive(false);
 			_inactiveStack.Push(obj);
 		}
