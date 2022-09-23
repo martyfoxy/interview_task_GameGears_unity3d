@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Code.Parameters;
+using Code.Players;
 using Code.Settings;
 using Code.UI;
 using Zenject;
@@ -36,8 +36,8 @@ namespace Code
 
         public void Initialize()
         {
-            _uiController.AddStartGameHandler(StartGame);
-            _uiController.AddStartGameWithBuffsHandler(StartGameWithBuffs);
+            _uiController.SetStartGameClickHandler(StartGame);
+            _uiController.SetStartGameWithBuffsClickHandler(StartGameWithBuffs);
 
             for (var i = 0; i < _settingsRepository.Settings.settings.playersCount; i++)
                 _playerViewRepository.AddView(i, _playersViewData[i].playerView);

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Code.Data;
-using Code.Parameters;
 
-namespace Code
+namespace Code.Players
 {
     public sealed class Player
     {
@@ -31,12 +31,14 @@ namespace Code
             Buffs = buffs;
         }
 
-        public void Reset()
+        public Parameter GetParameterById(int statId)
         {
-            HP.Reset();
-            Armor.Reset();
-            Damage.Reset();
-            Vampirism.Reset();
+            var temp = new List<Parameter>()
+            {
+                HP, Armor, Damage, Vampirism
+            };
+            
+            return temp.FirstOrDefault(x => x.ID == statId);
         }
 
         public float TakeDamage(float damage)

@@ -1,7 +1,7 @@
 ﻿using System;
 using Code.UI;
 
-namespace Code
+namespace Code.Players
 {
     [Serializable]
     public struct PlayerViewData

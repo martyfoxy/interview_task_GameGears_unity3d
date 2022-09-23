@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Code.Data;
+using Code.Players;
 using Code.Settings;
 using UnityEngine;
 using Zenject;
@@ -25,7 +26,6 @@ namespace Code.UI
         private Action _startGameClick;
         private Action _startGameWithBuffsClick;
         
-
         public UiController(
             UiContainer uiContainer, 
             PlayerRepository playerRepository,
@@ -44,8 +44,8 @@ namespace Code.UI
 
         public void Initialize()
         {
-            _uiContainer.buffReloadBtn.onClick.AddListener(() => _startGameWithBuffsClick?.Invoke());
-            _uiContainer.bufflessReloadBtn.onClick.AddListener(() => _startGameClick?.Invoke());
+            _uiContainer.ReloadWithBuffsBtn.onClick.AddListener(() => _startGameWithBuffsClick?.Invoke());
+            _uiContainer.ReloadBtn.onClick.AddListener(() => _startGameClick?.Invoke());
 
             for (var i = 0; i < _settingsRepository.Settings.settings.playersCount; i++)
             {
@@ -63,58 +63,37 @@ namespace Code.UI
                 var bindingData = _playersViewData[i];
                 var player = _playerRepository.Get(i);
                 
-                //Добавляем иконки статов
                 foreach (var stat in _settingsRepository.Settings.stats)
-                    AddStatToPanel(i, stat, bindingData.panelView.statsPanel);
-                
-                //Выставление значений
-                if (_statViews.TryGetValue(new TeamStatRelation(i, player.Armor.ID), out var armorView))
-                    armorView.SetLabel(player.Armor.Value.ToString(CultureInfo.InvariantCulture));
-                
-                if (_statViews.TryGetValue(new TeamStatRelation(i, player.Damage.ID), out var damageView))
-                    damageView.SetLabel(player.Damage.Value.ToString(CultureInfo.InvariantCulture));
-                
-                if (_statViews.TryGetValue(new TeamStatRelation(i, player.Vampirism.ID), out var vampirView))
-                    vampirView.SetLabel(player.Vampirism.Value.ToString(CultureInfo.InvariantCulture));
-
-                //Подписка на изменение HP
-                if (_statViews.TryGetValue(new TeamStatRelation(i, player.HP.ID), out var hpView))
                 {
-                    hpView.SetLabel(player.HP.Value.ToString(CultureInfo.InvariantCulture));
-                    player.HP.OnChanged += parameter =>
-                    {
-                        hpView.SetLabel(parameter.Value.ToString(CultureInfo.InvariantCulture));
-                    };
-                }
+                    var statView = AddStatToPanel(i, stat, bindingData.panelView.statsPanel);
+                    var parameter = player.GetParameterById(stat.id);
+                    statView.SetLabel(parameter.Value.ToString(CultureInfo.InvariantCulture));
 
-                //Добавляем иконки баффов
+                    //Динамически изменяется только HP
+                    if (stat.id == StatsId.LIFE_ID)
+                    {
+                        player.HP.OnChanged += hpParameter =>
+                        {
+                            statView.SetLabel(hpParameter.Value.ToString(CultureInfo.InvariantCulture));
+                        };
+                    }
+                }
+                
                 foreach (var playerBuff in player.Buffs)
                     AddBuffToPanel(i, playerBuff, bindingData.panelView.statsPanel);
             }
         }
 
-        public void AddStartGameHandler(Action handler)
+        public void SetStartGameClickHandler(Action handler)
         {
             _startGameClick = handler;
         }
 
-        public void AddStartGameWithBuffsHandler(Action handler)
+        public void SetStartGameWithBuffsClickHandler(Action handler)
         {
             _startGameWithBuffsClick = handler;
         }
         
-        private void AddStatToPanel(int teamId, Stat stat, Transform panel)
-        {
-            if (!_statsSpriteCache.TryGetValue(stat.id, out var sprite))
-            {
-                sprite = Resources.Load<Sprite>("Icons/" + stat.icon);
-                _statsSpriteCache.Add(stat.id, sprite);
-            }
-            
-            var statView = SpawnStatView(panel, sprite);
-            _statViews.Add(new TeamStatRelation(teamId, stat.id), statView);
-        }
-
         private void ClearPanel()
         {
             foreach (var view in _buffsViews.Values)
@@ -125,6 +104,20 @@ namespace Code.UI
             
             _statViews.Clear();
             _buffsViews.Clear();
+        }
+        
+        private StatView AddStatToPanel(int teamId, Stat stat, Transform panel)
+        {
+            if (!_statsSpriteCache.TryGetValue(stat.id, out var sprite))
+            {
+                sprite = Resources.Load<Sprite>("Icons/" + stat.icon);
+                _statsSpriteCache.Add(stat.id, sprite);
+            }
+            
+            var statView = SpawnStatView(panel, sprite);
+            _statViews.Add(new TeamStatRelation(teamId, stat.id), statView);
+
+            return statView;
         }
 
         private void AddBuffToPanel(int teamId, Buff buff, Transform panel)

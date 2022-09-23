@@ -5,7 +5,7 @@ namespace Code.UI
 {
     public sealed class UiContainer : MonoBehaviour
     {
-        public Button buffReloadBtn;
-        public Button bufflessReloadBtn;
+        public Button ReloadWithBuffsBtn;
+        public Button ReloadBtn;
     }
 }

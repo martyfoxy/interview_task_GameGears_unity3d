@@ -669,6 +669,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc554e893d34420a80b20c690015473d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraView: {fileID: 871526793}
   playersViewData:
   - playerView: {fileID: 1612305483}
     panelView: {fileID: 502479217}
@@ -950,8 +951,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b9e20ba4dc5d0549b694536f1dc1c90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buffReloadBtn: {fileID: 2109196114}
-  bufflessReloadBtn: {fileID: 1568522399}
+  ReloadWithBuffsBtn: {fileID: 2109196114}
+  ReloadBtn: {fileID: 1568522399}
 --- !u!224 &1162830171
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1062,7 +1063,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000010754808384, guid: 486e302ca293de54a8e5ca500d5d717d, type: 3}
       propertyPath: m_Name
-      value: ButtlessReloadButton
+      value: ReloadButton
       objectReference: {fileID: 0}
     - target: {fileID: 1000010754808384, guid: 486e302ca293de54a8e5ca500d5d717d, type: 3}
       propertyPath: m_IsActive
@@ -1400,7 +1401,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000010754808384, guid: 486e302ca293de54a8e5ca500d5d717d, type: 3}
       propertyPath: m_Name
-      value: BuffReloadButton
+      value: ReloadWithBuffsButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000010754808384, guid: 486e302ca293de54a8e5ca500d5d717d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114000013040830292, guid: 486e302ca293de54a8e5ca500d5d717d, type: 3}
       propertyPath: m_Text

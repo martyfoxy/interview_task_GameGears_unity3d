@@ -1,4 +1,6 @@
-﻿namespace Code
+﻿using Code.Players;
+
+namespace Code
 {
     public sealed class ActionPerformer
     {

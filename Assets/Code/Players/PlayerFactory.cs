@@ -4,7 +4,7 @@ using Code.Data;
 using Code.Settings;
 using UnityEngine;
 
-namespace Code.Parameters
+namespace Code.Players
 {
     public sealed class PlayerFactory
     {

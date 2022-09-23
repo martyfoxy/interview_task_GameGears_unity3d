@@ -1,10 +1,13 @@
 using System.Collections;
+using Code.Data;
+using Code.Settings;
 using UnityEngine;
+using Zenject;
 using Random = UnityEngine.Random;
 
 namespace Code
 {
-    public sealed class CameraView : MonoBehaviour
+    public sealed class CameraView : MonoBehaviour, IInitializable, ITickable
     {
         [SerializeField]
         private Camera camera;
@@ -15,20 +18,26 @@ namespace Code
         [SerializeField]
         private float zoomSpeed = 50f;
 
-        private float _defaultFov;
-        private float _minFov;
+        private SettingsRepository _settingsRepository;
+        private CameraModel _cameraSettings;
         private bool _isZoomed;
         private float _randOffset;
 
-        private void Start()
+        [Inject]
+        public void Inject(SettingsRepository settingsRepository)
         {
-            _defaultFov = camera.fieldOfView;
-            _minFov = _defaultFov / 2;
+            _settingsRepository = settingsRepository;
+        }
+        
+        public void Initialize()
+        {
+            _cameraSettings = _settingsRepository.Settings.cameraSettings;
+            camera.fieldOfView = _cameraSettings.fovMax;
 
             StartCoroutine(WaitRandomDoAction());
         }
-
-        private void Update()
+        
+        public void Tick()
         {
             transform.Rotate(0f, speed * Time.deltaTime, 0f);
 
@@ -42,13 +51,13 @@ namespace Code
         {
             while (true)
             {
-                var randTime = Random.Range(1, 5);
+                var randTime = Random.Range(1, _cameraSettings.fovDelay);
                 yield return new WaitForSeconds(randTime);
 
                 _isZoomed = !_isZoomed;
                 _randOffset = Random.Range(0, 20f);
                 
-                randTime = Random.Range(1, 5);
+                randTime = Random.Range(1, _cameraSettings.fovDuration);
                 yield return new WaitForSeconds(randTime);
             }
         }
@@ -56,13 +65,13 @@ namespace Code
         private void ZoomIn()
         {
             camera.fieldOfView -= zoomSpeed * Time.deltaTime;
-            camera.fieldOfView = Mathf.Max(_minFov + _randOffset, camera.fieldOfView);
+            camera.fieldOfView = Mathf.Max(_cameraSettings.fovMin + _randOffset, camera.fieldOfView);
         }
         
         private void ZoomOut()
         {
             camera.fieldOfView += zoomSpeed * Time.deltaTime;
-            camera.fieldOfView = Mathf.Min(_defaultFov, camera.fieldOfView);
+            camera.fieldOfView = Mathf.Min(_cameraSettings.fovMax, camera.fieldOfView);
         }
     }
 }

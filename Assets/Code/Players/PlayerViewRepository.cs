@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Code
+namespace Code.Players
 {
     public sealed class PlayerViewRepository
     {

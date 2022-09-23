@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Code.Parameters;
+using Code.Players;
 using Code.Settings;
 using Code.UI;
 using UnityEngine;
@@ -9,6 +9,9 @@ namespace Code
 {
     public sealed class EntryInstaller : MonoInstaller
     {
+        [SerializeField]
+        private CameraView cameraView;
+        
         [SerializeField]
         private List<PlayerViewData> playersViewData;
 
@@ -22,18 +25,22 @@ namespace Code
         {
             Container.BindInterfacesAndSelfTo<SettingsRepository>()
                 .AsSingle();
-
-            Container.BindInterfacesAndSelfTo<PlayerFactory>()
+            
+            Container.BindInterfacesAndSelfTo<CameraView>()
+                .FromInstance(cameraView)
                 .AsSingle();
 
-            Container.BindInterfacesAndSelfTo<PlayerRepository>()
+            Container.Bind<PlayerFactory>()
+                .AsSingle();
+
+            Container.Bind<PlayerRepository>()
                 .AsSingle();
 
             Container.BindInterfacesAndSelfTo<GameManager>()
                 .AsSingle()
                 .WithArguments(playersViewData);
 
-            Container.BindInterfacesAndSelfTo<PlayerViewRepository>()
+            Container.Bind<PlayerViewRepository>()
                 .AsSingle();
             
             Container.Bind<ActionPerformer>()
@@ -56,7 +63,7 @@ namespace Code
                 .AsSingle()
                 .WithArguments(playersViewData);
 
-            Container.BindInterfacesAndSelfTo<HpBarPresenter>()
+            Container.Bind<HpBarPresenter>()
                 .AsSingle();
         }
     }

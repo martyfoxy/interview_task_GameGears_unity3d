@@ -1,8 +1,7 @@
-﻿using Code.Parameters;
-using Code.UI;
+﻿using Code.UI;
 using UnityEngine;
 
-namespace Code
+namespace Code.Players
 {
     public sealed class PlayerView : MonoBehaviour
     {

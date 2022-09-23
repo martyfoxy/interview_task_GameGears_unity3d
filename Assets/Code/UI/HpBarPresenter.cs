@@ -1,17 +1,15 @@
-﻿using Code.Parameters;
+﻿using Code.Players;
 using Code.Settings;
 using Zenject;
 
 namespace Code.UI
 {
-    public sealed class HpBarPresenter : IInitializable
+    public sealed class HpBarPresenter
     {
         private readonly PlayerRepository _playerRepository;
-        private readonly PrefabsSettings _prefabsSettings;
         private readonly SettingsRepository _settingsRepository;
         private readonly PlayerViewRepository _playerViewRepository;
-
-        private Pool<DamageTakenView> _pool;
+        private readonly Pool<DamageTakenView> _pool;
         
         public HpBarPresenter(
             PlayerRepository playerRepository,
@@ -20,16 +18,11 @@ namespace Code.UI
             PlayerViewRepository playerViewRepository)
         {
             _playerRepository = playerRepository;
-            _prefabsSettings = prefabsSettings;
             _settingsRepository = settingsRepository;
             _playerViewRepository = playerViewRepository;
+            _pool = new Pool<DamageTakenView>(prefabsSettings.DamageTakenPrefab, 3);
         }
-
-        public void Initialize()
-        {
-            _pool = new Pool<DamageTakenView>(_prefabsSettings.DamageTakenPrefab, 3);
-        }
-
+        
         public void ReInit()
         {
             for (var i = 0; i < _settingsRepository.Settings.settings.playersCount; i++)

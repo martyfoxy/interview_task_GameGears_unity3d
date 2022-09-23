@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Code
+namespace Code.Players
 {
     public sealed class PlayerRepository
     {
