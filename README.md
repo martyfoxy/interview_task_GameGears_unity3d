@@ -1,1 +1,3 @@
-# interview_task_GameGears_unity3d
+Тестовое задание для Game Gears.
+
+Из библиотек использовал только Zenject в качестве DI-контейнера
