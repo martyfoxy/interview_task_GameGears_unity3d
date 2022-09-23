@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Code.Players;
+﻿using Code.Players;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,7 +30,7 @@ namespace Code.UI
 
         public void SetValue(Parameter hpParameter)
         {
-            hpBarText.text = hpParameter.Value.ToString(CultureInfo.InvariantCulture);
+            hpBarText.text = hpParameter.Value.ToString("F");
             hpBarImage.fillAmount = hpParameter.Value / hpParameter.InitValue;
         }
     }
