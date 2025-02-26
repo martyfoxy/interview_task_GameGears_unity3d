@@ -1,3 +1,3 @@
-Тестовое задание для Game Gears.
+Game Gears inverview test assignment
 
-Из библиотек использовал только Zenject в качестве DI-контейнера
+I used Zenject as a DI-container
